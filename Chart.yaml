@@ -1,0 +1,19 @@
+apiVersion: v1
+appVersion: 1.0.0
+deprecated: false
+description: Grav - A Modern Flat-File CMS | Official home of Grav CMS
+engine: gotpl
+home: http://www.getgrav.com/
+icon: https://bitnami.com/assets/stacks/grav/img/grav-stack-220x234.png
+keywords:
+- grav
+- cms
+- blog
+- http
+- web
+- application
+- php
+name: grav
+sources:
+- https://github.com/bitnami/bitnami-docker-grav
+version: 1.0.0

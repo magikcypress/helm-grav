@@ -1,0 +1,209 @@
+apiVersion: {{ template "grav.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ template "grav.fullname" . }}
+  labels: {{- include "grav.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "grav.matchLabels" . | nindent 6 }}
+  {{- if .Values.updateStrategy }}
+  strategy: {{ toYaml .Values.updateStrategy | nindent 4 }}
+  {{- end }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels: {{- include "grav.labels" . | nindent 8 }}
+      {{- if or .Values.podAnnotations .Values.metrics.enabled }}
+      annotations:
+        {{- if .Values.podAnnotations }}
+        {{- include "grav.tplValue" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.metrics.podAnnotations }}
+        {{- include "grav.tplValue" (dict "value" .Values.metrics.podAnnotations "context" $) | nindent 8 }}
+        {{- end }}
+      {{- end }}
+    spec:
+{{- include "grav.imagePullSecrets" . | indent 6 }}
+      {{- if .Values.schedulerName }}
+      schedulerName: {{ .Values.schedulerName | quote }}
+      {{- end }}
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "status.localhost"
+      {{- if .Values.affinity }}
+      affinity: {{- include "grav.tplValue" (dict "value" .Values.affinity "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "grav.tplValue" (dict "value" .Values.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- include "grav.tplValue" (dict "value" .Values.tolerations "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
+      containers:
+        - name: grav
+          image: {{ template "grav.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          env:
+            {{- if .Values.image.debug }}
+            - name: NAMI_DEBUG
+              value: "--log-level trace"
+            {{- end }}
+            - name: ALLOW_EMPTY_PASSWORD
+              value: {{ ternary "yes" "no" .Values.allowEmptyPassword | quote }}
+            - name: grav_USERNAME
+              value: {{ .Values.gravUsername | quote }}
+            - name: grav_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "grav.fullname" . }}
+                  key: grav-password
+            - name: grav_EMAIL
+              value: {{ .Values.gravEmail | quote }}
+            - name: grav_FIRST_NAME
+              value: {{ .Values.gravFirstName | quote }}
+            - name: grav_LAST_NAME
+              value: {{ .Values.gravLastName | quote }}
+            - name: grav_HTACCESS_OVERRIDE_NONE
+              value: {{ ternary "yes" "no" .Values.allowOverrideNone | quote }}
+            - name: grav_BLOG_NAME
+              value: {{ .Values.gravBlogName | quote }}
+            - name: grav_SKIP_INSTALL
+              value: {{ ternary "yes" "no" .Values.gravSkipInstall | quote }}
+            - name: grav_TABLE_PREFIX
+              value: {{ .Values.gravTablePrefix | quote }}
+            - name: grav_SCHEME
+              value: {{ .Values.gravScheme | quote }}
+            {{- if .Values.smtpHost }}
+            - name: SMTP_HOST
+              value: {{ .Values.smtpHost | quote }}
+            {{- end }}
+            {{- if .Values.smtpPort }}
+            - name: SMTP_PORT
+              value: {{ .Values.smtpPort | quote }}
+            {{- end }}
+            {{- if .Values.smtpUser }}
+            - name: SMTP_USER
+              value: {{ .Values.smtpUser | quote }}
+            {{- end }}
+            {{- if .Values.smtpPassword }}
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "grav.fullname" . }}
+                  key: smtp-password
+            {{- end }}
+            {{- if .Values.smtpUsername }}
+            - name: SMTP_USERNAME
+              value: {{ .Values.smtpUsername | quote }}
+            {{- end }}
+            {{- if .Values.smtpProtocol }}
+            - name: SMTP_PROTOCOL
+              value: {{ .Values.smtpProtocol | quote }}
+            {{- end }}
+            {{- if .Values.extraEnv }}
+            {{- include "grav.tplValue" (dict "value" .Values.extraEnv "context" $) | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: https
+              containerPort: 8443
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            httpGet:
+              path: /index.php
+              port: {{ ternary "https" "http" .Values.healthcheckHttps }}
+              {{- if .Values.healthcheckHttps }}
+              scheme: HTTPS
+              {{- end }}
+              {{- if .Values.livenessProbeHeaders }}
+              httpHeaders: {{- toYaml .Values.livenessProbeHeaders | nindent 16 }}
+              {{- end }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            httpGet:
+              path: /index.php
+              port: {{ ternary "https" "http" .Values.healthcheckHttps }}
+              {{- if .Values.healthcheckHttps }}
+              scheme: HTTPS
+              {{- end }}
+              {{- if .Values.readinessProbeHeaders }}
+              httpHeaders: {{- toYaml .Values.readinessProbeHeaders | nindent 16 }}
+              {{- end }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /bitnami/grav
+              name: grav-data
+              subPath: grav
+            {{- if .Values.extraVolumeMounts }}
+            {{- include "grav.tplValue" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if .Values.resources }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+        {{- if .Values.metrics.enabled }}
+        - name: metrics
+          image: {{ template "grav.metrics.image" . }}
+          imagePullPolicy: {{ .Values.metrics.image.pullPolicy | quote }}
+          command:
+            - /bin/apache_exporter
+            - -scrape_uri
+            - http://status.localhost:8080/server-status/?auto
+          ports:
+            - name: metrics
+              containerPort: 9117
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          {{- if .Values.metrics.resources }}
+          resources: {{- toYaml .Values.metrics.resources | nindent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.sidecars }}
+        {{- include "grav.tplValue" (dict "value" .Values.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        {{- if and .Values.allowOverrideNone .Values.customHTAccessCM }}
+        - name: custom-htaccess
+          configMap:
+            name: {{ template "grav.customHTAccessCM" . }}
+            items:
+              - key: grav-htaccess.conf
+                path: grav-htaccess.conf
+        {{- end }}
+        - name: grav-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "grav.fullname" .) }}
+          {{- else }}
+          emptyDir: {}
+          {{ end }}
+        {{- if .Values.extraVolumes }}
+        {{- include "grav.tplValue" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
