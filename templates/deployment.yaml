@@ -149,9 +149,8 @@ spec:
               {{- end }}
           {{- end }}
           volumeMounts:
-            - mountPath: /bitnami/grav
-              name: grav-data
-              subPath: grav
+            - name: grav-data
+              mountPath: /data
             {{- if .Values.extraVolumeMounts }}
             {{- include "grav.tplValue" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
