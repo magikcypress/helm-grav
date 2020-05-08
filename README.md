@@ -6,7 +6,7 @@ Grav is a modern open source flat-file CMS
 
 ## This Helm chart
 
-Given the personal helm chart of Grav at [bitnami/charts](https://github.com/magikcypress/helm-grav).
+Given the personal helm chart of Grav at [magikcypress/charts](https://github.com/magikcypress/helm-grav).
 
 
 ```bash
@@ -182,7 +182,7 @@ The following table lists the configurable parameters of the grav chart and thei
 |-------------------------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------|
 | `metrics.enabled`                         | Start a side-car prometheus exporter                                         | `false`                                                      |
 | `metrics.image.registry`                  | Apache exporter image registry                                               | `docker.io`                                                  |
-| `metrics.image.repository`                | Apache exporter image name                                                   | `bitnami/apache-exporter`                                    |
+| `metrics.image.repository`                | Apache exporter image name                                                   | `magikcypress/apache-exporter`                                    |
 | `metrics.image.tag`                       | Apache exporter image tag                                                    | `{TAG_NAME}`                                                 |
 | `metrics.image.pullPolicy`                | Image pull policy                                                            | `IfNotPresent`                                               |
 | `metrics.image.pullSecrets`               | Specify docker-registry secret names as an array                             | `[]` (does not add image pull secrets to deployed pods)      |
