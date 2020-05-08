@@ -314,7 +314,6 @@ ingress:
 ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
 ##
 persistence:
-  enabled: true
   ## grav data Persistent Volume Storage Class
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -323,12 +322,10 @@ persistence:
   ##   GKE, AWS & OpenStack)
   ##
   # storageClass: "-"
-  ##
-  ## If you want to reuse an existing claim, you can pass the name of the PVC using
-  ## the existingClaim variable
-  # existingClaim: your-claim
-  accessMode: ReadWriteOnce
-  size: 10Gi
+  dataDir:
+    # Set this to false if you don't care to persist state between restarts.
+    enabled: true
+    Size: 1Gi
 
 ## Prometheus Exporter / Metrics
 ##
