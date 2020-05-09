@@ -1,0 +1,18 @@
+{{- if .Values.persistence.enabled -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "grav.fullname" . }}-grav
+  labels:
+    app: {{ template "grav.name" . }}
+    chart: {{ template "grav.chart" . }}
+    release: {{ .Release.Name | quote }}
+    heritage: {{ .Release.Service | quote }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.grav.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.grav.size | quote }}
+  {{ include "grav.storageClass" . }}
+{{- end -}}

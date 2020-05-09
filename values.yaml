@@ -54,15 +54,10 @@ gravUsername: user
 ##
 gravEmail: user@example.com
 
-## First name
+## Full name
 ## ref: https://github.com/bitnami/bitnami-docker-grav#environment-variables
 ##
-gravFirstName: FirstName
-
-## Last name
-## ref: https://github.com/bitnami/bitnami-docker-grav#environment-variables
-##
-gravLastName: LastName
+gravFullname: Fullname
 
 ## Blog name
 ## ref: https://github.com/bitnami/bitnami-docker-grav#environment-variables
@@ -184,8 +179,8 @@ securityContext:
   fsGroup: 1001
   runAsUser: 1001
 
-## Allow health checks to be pointed at the https port
-healthcheckHttps: false
+# Heather checks path
+gravPath: /index.php
 
 ## grav pod extra options for liveness and readiness probes
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
@@ -314,18 +309,18 @@ ingress:
 ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
 ##
 persistence:
-  ## grav data Persistent Volume Storage Class
-  ## If defined, storageClassName: <storageClass>
-  ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  ## If undefined (the default) or set to null, no storageClassName spec is
-  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-  ##   GKE, AWS & OpenStack)
-  ##
-  # storageClass: "-"
-  dataDir:
-    # Set this to false if you don't care to persist state between restarts.
-    enabled: true
-    Size: 1Gi
+  enabled: true
+  grav:
+    ## grav data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 8Gi
 
 ## Prometheus Exporter / Metrics
 ##
