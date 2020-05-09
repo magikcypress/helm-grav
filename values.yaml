@@ -103,16 +103,6 @@ customHTAccessCM:
 ##
 # schedulerName:
 
-## SMTP mail delivery configuration
-## ref: https://github.com/bitnami/bitnami-docker-grav/#smtp-configuration
-##
-# smtpHost:
-# smtpPort:
-# smtpUser:
-# smtpPassword:
-# smtpUsername:
-# smtpProtocol:
-
 replicaCount: 1
 
 ## Additional container environment variables
@@ -180,7 +170,7 @@ securityContext:
   runAsUser: 1001
 
 # Heather checks path
-gravPath: /index.php
+gravPath: /
 
 ## grav pod extra options for liveness and readiness probes
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
